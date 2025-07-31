@@ -135,7 +135,8 @@ lemma T_finite : Set.Finite (T K D) := by
       (Set.range (Algebra.TensorProduct.includeLeft : D →ₐ[K] D_𝔸)) := by
     rintro _ ⟨t, ⟨ht1, d, rfl⟩, rfl⟩
     exact ⟨ht1, d, rfl⟩
-  exact Set.Finite.of_finite_image (Set.Finite.subset h h1) (Function.Injective.injOn Units.ext)
+  exact Set.Finite.of_finite_image (Set.Finite.subset h h1)
+    (Function.Injective.injOn Units.val_injective)
 
 open scoped Pointwise in
 /-- An auxiliary set C used in the proof of Fukisaki's lemma. Defined as T⁻¹X × X. -/
@@ -159,11 +160,11 @@ lemma antidiag_mem_C {β : D_𝔸ˣ} (hβ : β ∈ ringHaarChar_ker D_𝔸) :
     ((Units.eq_inv_mul_iff_mul_eq β).mpr eq1).symm⟩
   obtain ⟨x2, rfl⟩ : IsUnit x2 := ⟨incl K D b2 * β, ((Units.mul_inv_eq_iff_eq_mul β).mp eq2).symm⟩
   have h : x2 * x1 ∈ T K D := ⟨by simpa only [Y] using (Set.mul_mem_mul hx2 hx1), b2 * b1,
-    by simpa using Units.eq_iff.mp (id (Eq.symm (by simpa [mul_assoc] using
+    by simpa using Units.val_inj.mp (id (Eq.symm (by simpa [mul_assoc] using
     (Mathlib.Tactic.LinearCombination'.mul_pf eq2 eq1))))⟩
   refine ⟨incl K D b1, by simp only [Set.mem_range, exists_apply_eq_apply],  x1⁻¹, ?_,
-    eq_mul_inv_of_mul_eq (Units.eq_iff.mp eq1), ?_, hx1⟩
-  · rw [(Eq.symm (inv_mul_eq_of_eq_mul (eq_mul_inv_of_mul_eq (Units.eq_iff.mp eq1))))]
+    eq_mul_inv_of_mul_eq (Units.val_inj.mp eq1), ?_, hx1⟩
+  · rw [(Eq.symm (inv_mul_eq_of_eq_mul (eq_mul_inv_of_mul_eq (Units.val_inj.mp eq1))))]
     exact (Subgroup.mul_mem_cancel_right (ringHaarChar_ker (D ⊗[K] AdeleRing (𝓞 K) K)) hβ).mpr
       ((Subgroup.inv_mem_iff (ringHaarChar_ker (D ⊗[K] AdeleRing (𝓞 K) K))).mpr
       (NumberField.AdeleRing.units_mem_ringHaarCharacter_ker K D b1))
