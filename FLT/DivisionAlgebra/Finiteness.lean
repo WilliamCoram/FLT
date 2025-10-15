@@ -17,6 +17,7 @@ import FLT.Mathlib.Topology.Algebra.Group.Basic
 import FLT.Mathlib.Topology.HomToDiscrete
 import FLT.Mathlib.GroupTheory.DoubleCoset
 import FLT.Mathlib.Topology.Algebra.Group.Quotient
+import Mathlib.MeasureTheory.Measure.Haar.Quotient
 
 /-
 
@@ -54,10 +55,42 @@ noncomputable abbrev incl : Dˣ →* D_𝔸ˣ :=
 
 namespace Aux
 
+/-- The additive subgroup with carrier defined by Algebra.TensorProduct.includeLeft. -/
+local instance includeLeft_subgroup : AddSubgroup D_𝔸 :=
+  AddMonoidHom.range (G := D) (Algebra.TensorProduct.includeLeft : D →ₐ[K] D_𝔸)
+
+/-- The K-algebra equivalence of D and K^n. -/
+abbrev D_iso : (D ≃ₗ[K] ((Fin (Module.finrank K D) → K))) := Module.Finite.equivPi K D
+
+/-- The 𝔸-algebra equivalence of D_𝔸 and 𝔸^d. -/
+abbrev D𝔸_iso : (D_𝔸 ≃ₗ[(AdeleRing (𝓞 K) K)] ((Fin (Module.finrank K D) → AdeleRing (𝓞 K) K))) :=
+  ((TensorProduct.RightActions.Module.TensorProduct.comm _ _ _).symm).trans
+    (TensorProduct.AlgebraTensorModule.finiteEquivPi K D (AdeleRing (𝓞 K) K))
+
+-- want a result saying that D\D_𝔸 is compact (from iso to K\K_𝔸 ^dim)
+
+lemma quot_D_compact : CompactSpace (_root_.Quotient (QuotientAddGroup.rightRel (α := D_𝔸)
+    (includeLeft_subgroup K D))) := by
+  have h1 := D_iso K D
+  have h2 := D𝔸_iso K D
+
+  have h3 := NumberField.AdeleRing.cocompact K
+  have h3_symm : CompactSpace (Quotient (QuotientAddGroup.rightRel (α := AdeleRing (𝓞 K) K)
+      (principalSubgroup (𝓞 K) K))) := by
+
+    sorry
+
+  -- need to apply h1 and h2 (do they need to be changed to same linear maps?)
+  -- then show we can reverse the quotient in h3
+  -- the result should then follow from the iso to the part in h3_symm ^dim.
+
+  sorry
+
 lemma existsE : ∃ E : Set (D_𝔸), IsCompact E ∧
     ∀ φ : D_𝔸 ≃ₜ+ D_𝔸, addEquivAddHaarChar φ = 1 → ∃ e₁ ∈ E, ∃ e₂ ∈ E,
     e₁ ≠ e₂ ∧ φ e₁ - φ e₂ ∈ Set.range (Algebra.TensorProduct.includeLeft : D →ₐ[K] D_𝔸) :=
-  -- MeasureTheory.QuotientMeasureEqMeasurePreimage.haarMeasure_quotient
+
+  have := MeasureTheory.AddQuotientMeasureEqMeasurePreimage.addHaarMeasure_quotient
   sorry
 
 /-- An auxiliary set E used in the proof of Fukisaki's lemma. -/
@@ -122,14 +155,6 @@ lemma X_meets_kernel' {β : D_𝔸ˣ} (hβ : β ∈ ringHaarChar_ker D_𝔸) :
 /-- An auxiliary set T used in the proof of Fukisaki's lemma. Defined as Y ∩ Dˣ. -/
 def T : Set D_𝔸ˣ := ((↑) : D_𝔸ˣ → D_𝔸) ⁻¹' (Y K D) ∩ Set.range ((incl K D : Dˣ → D_𝔸ˣ))
 
-/-- The K-algebra equivalence of D and K^n. -/
-abbrev D_iso : (D ≃ₗ[K] ((Fin (Module.finrank K D) → K))) := Module.Finite.equivPi K D
-
-/-- The 𝔸-algebra equivalence of D_𝔸 and 𝔸^d. -/
-abbrev D𝔸_iso : (D_𝔸 ≃ₗ[(AdeleRing (𝓞 K) K)] ((Fin (Module.finrank K D) → AdeleRing (𝓞 K) K))) :=
-  ((TensorProduct.RightActions.Module.TensorProduct.comm _ _ _).symm).trans
-    (TensorProduct.AlgebraTensorModule.finiteEquivPi K D (AdeleRing (𝓞 K) K))
-
 local instance : IsModuleTopology (AdeleRing (𝓞 K) K)
     ((Fin (Module.finrank K D) → AdeleRing (𝓞 K) K)) := by
 
@@ -178,10 +203,6 @@ theorem D_discrete : ∀ x : D, ∃ U : Set D_𝔸,
   apply Discrete_of_HomDiscrete (X' := Fin (Module.finrank K D) → K)
     ((D𝔸_iso_top K D) ∘ (Algebra.TensorProduct.includeLeft : D →ₐ[K] D_𝔸)) (D_iso K D)
   simpa [D_discrete_extracted] using Kn_discrete K D
-
-/-- The additive subgroup with carrier defined by Algebra.TensorProduct.includeLeft. -/
-local instance includeLeft_subgroup : AddSubgroup D_𝔸 :=
-  AddMonoidHom.range (G := D) (Algebra.TensorProduct.includeLeft : D →ₐ[K] D_𝔸)
 
 local instance : DiscreteTopology (includeLeft_subgroup K D).carrier := by
   rw [includeLeft_subgroup]
