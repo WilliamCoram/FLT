@@ -67,31 +67,119 @@ abbrev D𝔸_iso : (D_𝔸 ≃ₗ[(AdeleRing (𝓞 K) K)] ((Fin (Module.finrank 
   ((TensorProduct.RightActions.Module.TensorProduct.comm _ _ _).symm).trans
     (TensorProduct.AlgebraTensorModule.finiteEquivPi K D (AdeleRing (𝓞 K) K))
 
+local instance : IsModuleTopology (AdeleRing (𝓞 K) K)
+    ((Fin (Module.finrank K D) → AdeleRing (𝓞 K) K)) := by
+
+  sorry -- can be solved by typeclass inference if Mathlib#29315 is merged.
+
+/-- The topological equivalence via D𝔸_iso. -/
+abbrev D𝔸_iso_top : D_𝔸 ≃L[(AdeleRing (𝓞 K) K)]
+    ((Fin (Module.finrank K D) → AdeleRing (𝓞 K) K)) :=
+  IsModuleTopology.continuousLinearEquiv (D𝔸_iso K D)
+
+/-- The topological equivalence of D ⊆ D ⊗ A_K with K^d ⊆ (𝔸_K^d). Coming from the iso D ≃ K^d. -/
+abbrev extr_iso : (includeLeft_subgroup K D) ≃ₜ
+    (Fin (Module.finrank K D) → (principalSubgroup (𝓞 K) K)) where
+  toFun := by
+    have := (D𝔸_iso_top K D).restrict (p := (includeLeft_subgroup K D))
+      (q := Fin (Module.finrank K D) → (principalSubgroup (𝓞 K) K))
+
+    sorry
+  invFun := by
+
+    sorry
+
+
+
+def h_iso : (Fin (Module.finrank K D) →
+    Quotient (QuotientAddGroup.rightRel (principalSubgroup (𝓞 K) K))) ≃ₜ
+    (_root_.Quotient (QuotientAddGroup.rightRel (α := D_𝔸) (includeLeft_subgroup K D))) := by
+  have h1 := D𝔸_iso_top K D
+  have h2 := extr_iso K D
+
+
+
+  -- I also need a result saying that (K\𝔸_K)^d ≃ₜ (K^d)\(𝔸_K^d)...
+  -- maybe this is QuotientGroup.leftRel_prod ; then need to push to topologies
+  sorry
 -- want a result saying that D\D_𝔸 is compact (from iso to K\K_𝔸 ^dim)
 
 lemma quot_D_compact : CompactSpace (_root_.Quotient (QuotientAddGroup.rightRel (α := D_𝔸)
     (includeLeft_subgroup K D))) := by
   have h1 := D_iso K D
   have h2 := D𝔸_iso K D
-
   have h3 := NumberField.AdeleRing.cocompact K
   have h3_symm : CompactSpace (Quotient (QuotientAddGroup.rightRel (α := AdeleRing (𝓞 K) K)
       (principalSubgroup (𝓞 K) K))) := by
+    have : (Quotient (QuotientAddGroup.rightRel (α := AdeleRing (𝓞 K) K)
+        (principalSubgroup (𝓞 K) K))) ≃ₜ
+        ((AdeleRing (𝓞 K) K) ⧸ (principalSubgroup (𝓞 K) K)) := by
+      refine Equiv.toHomeomorphOfContinuousOpen
+        (QuotientAddGroup.quotientRightRelEquivQuotientLeftRel (principalSubgroup (𝓞 K) K)) ?_ ?_
+      ·
+        sorry
+      ·
+        sorry
+    exact Homeomorph.compactSpace (this.symm)
+  have h4 : CompactSpace (Fin (Module.finrank K D) →
+      (Quotient (QuotientAddGroup.rightRel (α := AdeleRing (𝓞 K) K)
+      (principalSubgroup (𝓞 K) K)))) := Function.compactSpace
+  exact Homeomorph.compactSpace (h_iso K D)
 
-    sorry
+-- we now want something saying we have a Haar measure on the quotient
 
-  -- need to apply h1 and h2 (do they need to be changed to same linear maps?)
-  -- then show we can reverse the quotient in h3
-  -- the result should then follow from the iso to the part in h3_symm ^dim.
+-- MeasureTheory.Measure.restrict_map_of_aemeasurable
 
+-- we then need to choose a compact set inside D_𝔸; product of lattices in the finite parts
+-- and a huge closed ball in the infinite part
+-- can follow proof of mulEquivHaarChar_restrictedProductCongrRight
+
+def E2 : Set (D ⊗[K] (FiniteAdeleRing (𝓞 K) K)) :=
+
+  sorry
+
+lemma E2_compact : IsCompact (E2 K D) := by
+
+  sorry
+
+def E1_ext : Set (Fin (Module.finrank K D) → (InfiniteAdeleRing K)) :=
+  -- this has to be a set such that its Haar Measure is greater than an arbitrary m...
+  -- the problem is what Haar measure do I now use?
+
+  -- I am supposing we can deconstruct the Haar measure on D_𝔸 into a product of measures on the
+  -- finite part and the infinite part.
+
+
+  sorry
+
+def D𝔸f_iso : (Fin (Module.finrank K D) → (InfiniteAdeleRing K)) ≃
+    (D ⊗[K] (InfiniteAdeleRing K)) := by
+
+  sorry
+
+def E1 : Set (D ⊗[K] (InfiniteAdeleRing K)) :=
+  D𝔸f_iso K D '' (E1_ext K D)
+
+lemma E1_compact : IsCompact (E1 K D) := by
+
+  sorry
+
+lemma iso₁_symm_continuous : Continuous (Algebra.TensorProduct.prodRight K K D
+    (NumberField.InfiniteAdeleRing K) (FiniteAdeleRing (𝓞 K) K)).invFun := by
+  -- this has been done in the other file... will just need to combine everything
   sorry
 
 lemma existsE : ∃ E : Set (D_𝔸), IsCompact E ∧
     ∀ φ : D_𝔸 ≃ₜ+ D_𝔸, addEquivAddHaarChar φ = 1 → ∃ e₁ ∈ E, ∃ e₂ ∈ E,
-    e₁ ≠ e₂ ∧ φ e₁ - φ e₂ ∈ Set.range (Algebra.TensorProduct.includeLeft : D →ₐ[K] D_𝔸) :=
+    e₁ ≠ e₂ ∧ φ e₁ - φ e₂ ∈ Set.range (Algebra.TensorProduct.includeLeft : D →ₐ[K] D_𝔸) := by
+  use ((Algebra.TensorProduct.prodRight K K D _ _)).invFun '' (Set.prod (E1 K D)  (E2 K D))
+  constructor
+  · exact IsCompact.image (IsCompact.prod (E1_compact K D) (E2_compact K D))
+      (iso₁_symm_continuous K D)
+  · intro φ hφ
+    -- this is the statement of non-injective. Need to work out how to argue this result
+    sorry
 
-  have := MeasureTheory.AddQuotientMeasureEqMeasurePreimage.addHaarMeasure_quotient
-  sorry
 
 /-- An auxiliary set E used in the proof of Fukisaki's lemma. -/
 def E : Set D_𝔸 := (existsE K D).choose
@@ -154,16 +242,6 @@ lemma X_meets_kernel' {β : D_𝔸ˣ} (hβ : β ∈ ringHaarChar_ker D_𝔸) :
 
 /-- An auxiliary set T used in the proof of Fukisaki's lemma. Defined as Y ∩ Dˣ. -/
 def T : Set D_𝔸ˣ := ((↑) : D_𝔸ˣ → D_𝔸) ⁻¹' (Y K D) ∩ Set.range ((incl K D : Dˣ → D_𝔸ˣ))
-
-local instance : IsModuleTopology (AdeleRing (𝓞 K) K)
-    ((Fin (Module.finrank K D) → AdeleRing (𝓞 K) K)) := by
-
-  sorry -- can be solved by typeclass inference if Mathlib#29315 is merged.
-
-/-- The topological equivalence via D𝔸_iso. -/
-abbrev D𝔸_iso_top : D_𝔸 ≃L[(AdeleRing (𝓞 K) K)]
-    ((Fin (Module.finrank K D) → AdeleRing (𝓞 K) K)) :=
-  IsModuleTopology.continuousLinearEquiv (D𝔸_iso K D)
 
 /-- The inclusion of K^n into 𝔸^n. -/
 abbrev incl_Kn_𝔸Kn : (Fin (Module.finrank K D) → K) →
