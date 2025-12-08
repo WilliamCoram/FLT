@@ -102,6 +102,7 @@ def h_iso : (Fin (Module.finrank K D) →
   -- I also need a result saying that (K\𝔸_K)^d ≃ₜ (K^d)\(𝔸_K^d)...
   -- maybe this is QuotientGroup.leftRel_prod ; then need to push to topologies
   sorry
+
 -- want a result saying that D\D_𝔸 is compact (from iso to K\K_𝔸 ^dim)
 
 lemma quot_D_compact : CompactSpace (_root_.Quotient (QuotientAddGroup.rightRel (α := D_𝔸)
@@ -191,11 +192,14 @@ lemma E_noninjective_left {x : D_𝔸ˣ} (h : x ∈ ringHaarChar_ker D_𝔸) :
     x * e₁ - x * e₂ ∈ Set.range (Algebra.TensorProduct.includeLeft : D →ₐ[K] D_𝔸) :=
   (existsE K D).choose_spec.2 (ContinuousAddEquiv.mulLeft x) h
 
+
 lemma E_noninjective_right {x : D_𝔸ˣ} (h : x ∈ ringHaarChar_ker D_𝔸) :
     ∃ e₁ ∈ E K D, ∃ e₂ ∈ E K D, e₁ ≠ e₂ ∧
     e₁ * x⁻¹ - e₂ * x⁻¹  ∈ Set.range (Algebra.TensorProduct.includeLeft : D →ₐ[K] D_𝔸) := by
   let φ : D_𝔸 ≃ₜ+ D_𝔸 := ContinuousAddEquiv.mulRight x⁻¹
-  have hφ : addEquivAddHaarChar φ = 1 := sorry
+  have hφ : addEquivAddHaarChar φ = 1 := by
+
+    sorry
   exact (existsE K D).choose_spec.2 φ hφ
 
 open scoped Pointwise in
